@@ -9,47 +9,24 @@ body {
 #gameContainer {
 
 	margin: 0 auto;
-	background-color: #FFF;
-	z-index: 0;
+	background-color: #FFF;	
 	top: 0;
 	left: 0;
 	width: 1000px;
-	height: auto;
+	height: 1000px;
 }
 
 #gameGrid {
 
 	margin: 5% auto;	
-	box-sizing: border-box;
-	text-align: center;
-	padding-bottom: 20px;
-	padding-left: 0;
-	padding-right: 0;
-	background-color: blue;
-	z-index: 1;
-	
-}
-
-#gameGrid div .row {
-
-	display: block;
 	width: 700px;
-	height: auto;
-	z-index: 2;
-}
-
-#gameGrid div .slot {
-
-	width: 100px;
-	height: 100px;
-	display: inline-block;
-	border-radius: 100%;
-	box-sizing: border-box;
-	margin: 2px;
-	z-index: 3;	
+	height: 100%;
+	background-color: blue;
 	
-
+	
 }
+
+
 
 @keyframes coinRotateRed {
     0% {background-color: white;}
@@ -61,6 +38,16 @@ body {
     100% {transform: rotateY(180deg); background-color: yellow;}
 }
 
+.slot {
+
+	width: 90px;
+	height: 90px;
+	float: left;
+	display: inline-block;
+	border-radius: 100%;	
+	margin: 2px;	
+
+}
 
 .empty {
 	background-color: #FFF;

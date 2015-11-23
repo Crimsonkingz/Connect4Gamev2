@@ -1,220 +1,215 @@
-// Connect 4 game
-// Have 3 difficulties - Easy, Medium, Hard
+// Connect 4 game version 2 (using a 1D array to check for legal moves and win condition)
+// Have 3 difficulties - Easy, Medium, Hard - WIP
 // Difficulties will vary the possibilities of the computer making a "perfect" move
-// Divs are placed in an array that will be the game grid
-// The divs have ID's with "row:(rowNum)_column:(columnNum)" with romNum and columnNum being it's position in the array
-// and classes of either "empty", "player" or "computer"
+
+// The tokens have classes of either "empty", "player" or "computer"
 // Player will be one colour and Computer will be another colour
 // Player starts first as it is an advantage (want player to win more)
 
 // Array to hold all the created div elements/game discs
 var gameGridArray = [];
 
+// Dimensions of game grid
+var totalRows;
+var totalColumns;
+var totalTokens;
+
 // Store win/loss state
 var gameWon;
-var randomChoice;
+
 // Game grid that will hold all of the divs
 var gameGrid = document.getElementById("gameGrid");
 
 // Store possible moves of the computer
-var rowLegals = [];
 var computerMoves = [];
 
 
 // Initialise start settings for the game
-function init(difficultyChoice) {
+function init(rows, columns) {
+	
 	// Reset game state
 	gameWon = false;
-	
-	
 
-	// Chance to pick randomly based on difficulty
-			if (difficultyChoice.toUpperCase() == "EASY") {
-				// 60% chance to choose randomly
-				randomChoice = 0.6; 
-			}
-			if (difficultyChoice.toUpperCase() == "MEDIUM") {
-				// 40% chance to choose randomly
-				randomChoice = 0.4;
-			}
-			if (difficultyChoice.toUpperCase() == "HARD") {
-				// 20% chance to choose randomly
-				randomChoice = 0.2;				
-			}
+	// Set global variables
+	totalTokens = rows * columns;	
+	totalRows = rows;
+	totalColumns = columns;
+
 	// If the game grid is already populated and needs to be cleared
 	if (gameGrid.children !== null && gameGrid.children.length !== 0) {
 		
-		for (var i = 0; i < gameGrid.length; i++) {}
-		gameGrid.removeChild(gameGrid.children[i]);
+		for (var i = 0; i < gameGrid.length; i++) {
+			gameGrid.removeChild(gameGrid.children[i]);
+		}
 	}
 	
 	
-	// Create an array to represent an empty 6x7 game grid
-	makeGameGridDivs(6,7);
-	populateGrid(gameGridArray);
+	// Creates tokens and an array to represent these tokens
+	makeGameGridTokens(rows, columns);	
 
 }
 
 
 
 // Connect 4 typically has 6 rows and 7 columns (wikipedia)
-function makeGameGridDivs(numRows, numColumns) {
+function makeGameGridTokens(numRows, numColumns) {
 
 
-	// Clear the game grid
-	gameGridArray.length = 0;
 
-	// Make desired number of rows (numRows)
-	for (var row = 0; row < numRows; row++) {
-		
-		// Create row container and assign it a row class and row number ID
-		var rowContainer = document.createElement("div");
-		rowContainer.id = "row" + row;
-		rowContainer.classList.add("row");
-		
-	  
-	  
-	  	// Make an entry for the number of columns i.e. the length of the row
-	  	for (var column = 0; column  < numColumns; column++) {
-	  	
-	  		// Fill with a div with ID for it's position and class for it's value/colour
-			var div = document.createElement("div");
+	// Created required number of div elements to act as tokens
+	// also add objects to a 1D array for easier use in checking functions
+	for (var i = 0; i < totalTokens; i++) {
+		// Make and setup DOM element
+		var token = document.createElement("div");
+		token.id = "token-" + i;
+		token.classList.add("slot", "empty");
+		token.addEventListener("click", playerTokenChoice);
+		gameGrid.appendChild(token);
 
-			// backslashes are "escape" characters like "\n" for new line
-			// so need two backslashes to output a single backslash
-			div.id = "column" + column;
-			div.classList.add("slot");
-			div.classList.add("empty");
-			
-			div.addEventListener("click", playerTokenChoice);
 
-			rowContainer.appendChild(div);
+		// Add an object representing the made token into a 1D array
+		gameGridArray.push({
+			id: i,
+			value: "empty"
+		})
 
-		}
-
-	gameGridArray.push(rowContainer);
-	    
 	}
+
 }	
-
-// Puts the divs/game slots into the game grid
-function populateGrid(gameDivArray) {
-	for (var i = 0; i < gameDivArray.length; i++) {
-		gameGrid.appendChild(gameDivArray[i]);
-	}
-}
 
 // Player click handler 
 function playerTokenChoice() {
 	
-	var clickedDiv = this;
-	
-	// If the clicked on slot is a legal move
-	if (legalMove(clickedDiv)) {
-		// Remove empty class and replace with player class
-		clickedDiv.classList.toggle("empty");
-		clickedDiv.classList.toggle("player");
+	var clickedToken = this;
+	var clickedTokenID = parseInt(clickedToken.id.substring(6));
+	console.log("Clicked Token ID: " + clickedTokenID);
 
+	// Find the object in the array
+	var clickedTokenArrayObject = objectFindByKey(gameGridArray, "id", clickedTokenID);
+
+
+	// If the clicked on slot is a legal move
+	if (legalMove(clickedTokenArrayObject)) {
+		// Remove empty class and replace with player class
+		clickedToken.classList.toggle("empty");
+		clickedToken.classList.toggle("player");		
 		// Remove click event listener
-		clickedDiv.removeEventListener("click", playerTokenChoice);
+		clickedToken.removeEventListener("click", playerTokenChoice);
+
+		// Update array object
+		clickedTokenArrayObject.value = "player";
+
+		// Check if the player has won the game
 		checkWin();
+		// If the game has not been won then the computer takes its turn after 1 second
+		// Otherwise create a player won message
 		if (!gameWon) {
 			setTimeout(computerTokenChoice, 1000);
+		}
+		else {
+			alert("Well done, you win!");
 		}		
 	}
 }
 
 // Build simple computer AI
 function computerTokenChoice() {
-	var rows = gameGrid.childNodes;
-	
-	computerMoves.length = 0;
-	rowLegals.length = 0;
 
-	for (var i = 0; i < rows.length; i++) {
-		
-		currentRow = rows[i];
-		computerMoves.push(generateMoves(currentRow));
-		
+	generateMoves();
+	
+	var randomChoice = Math.floor(Math.random() * computerMoves.length);
+	
+
+
+	var chosenToken = document.getElementById(computerMoves[randomChoice]);
+
+	chosenToken.classList.toggle("empty");
+	chosenToken.classList.toggle("computer");
+	chosenToken.removeEventListener("click", playerTokenChoice);
+
+	// Check if the computer has won
+	checkWin();
+	if (gameWon) {
+		alert("You lose!");
 	}
-	
-	var rowNum = Math.floor(Math.random() * computerMoves.length);
-	var columnNum = Math.floor(Math.random() * computerMoves[rowNum].length);
-
-
-	var chosenDiv = computerMoves[rowNum][columnNum];
-
-	chosenDiv.classList.toggle("empty");
-	chosenDiv.classList.toggle("computer");
-	chosenDiv.removeEventListener("click", playerTokenChoice);
 
 }
 
 
-function legalMove(clickedToken) {
+function legalMove(arrayToken) {
+	// var row = Math.floor(arrayToken.id / totalColumns);
+	// console.log("Row: " + row);
+	// var column = arrayToken.id % totalColumns;
+	// console.log("Column: " + column);
 	
-	// Get the column of the clicked token
-	var tokenColumnId = clickedToken.id;	
-	// Get the row from the row parent container
-	var parentRowId = clickedToken.parentNode.id;
-
-	// Get the row and column IDs as numbers
-	var tokenRow = parseInt(parentRowId.substr(3,1));
-	var tokenColumn = parseInt(tokenColumnId.substr(6,1));
-	var emptyPos = clickedToken.classList.contains("empty");
-
-
-	// If the clicked token is in the last row and isn't already occupied then it is a legal move
-	// This avoids serching the next row's cells if clicking on the last row -> null values
-	if (tokenRow == (gameGridArray.length - 1) && emptyPos) {
-		return true;
-	}
-
-	// If the clicked token is occupied then it is an illegal move
-	else if (!emptyPos) {
-		return false;
-	}
-
-	else {
-
-		// Get the token below the one clicked
-		var rowBelow = gameGrid.childNodes[(tokenRow + 1)];		
-		var tokenBelow = rowBelow.childNodes[tokenColumn];
+	if (arrayToken.value === "empty") {
+		var tokenBelowID = arrayToken.id + totalColumns;
 		
-		// If the token below isnt empty then it is a legal move
-		if (!tokenBelow.classList.contains("empty")) {
+		var tokenBelow = objectFindByKey(gameGridArray, "id", tokenBelowID);
+		
+		// Legal move if it is the last row
+		if (tokenBelowID >= totalTokens) {
 			return true;
 		}
-		// If there isn't a token below then it is an illegal move
+		// Legal move if there is a token below belonging to the player or computer
+		else if (tokenBelow.value !== "empty") {
+			return true;
+		}
 		else {
 			return false;
 		}
 	}	
-	
 }
 
-// Builds an array of legal moves for the row
-function generateMoves(row) {
-	
-	var choices = row.childNodes;
-	
-	var slotChoice;
-	
-	// Build array of possible choices
-	for (var i = 0; i < choices.length; i++) {
-		slotChoice = choices[i];
+// Builds an array of legal moves for the computer
+function generateMoves() {
+	console.log("generating moves")
+	// Clear previous moves
+	computerMoves.length = 0;
 
-		if (legalMove(slotChoice)) {
-			rowLegals.push(slotChoice)
+	// Go through each token and see if it is a possible move
+	// If so, add the ID of that token to an array of possible tokens to click
+	for (var token = 0; token < totalTokens; token++) {
+		if (legalMove(gameGridArray[token])) {
+			console.log("token " + token + " is a legal move");
+			computerMoves.push("token-" + token);
 		}
 	}
-	
-	return rowLegals;
-	
 }
 
 function checkWin() {
 
+	// Check the gameGridArray to see if there are 4 consecutive tokens in any direction
+	checkRows();
+	checkColumns();
+	checkLtRDiags();
+	checkRtLDiags();
 }
 
-init("EASY");
+function checkRows() {
+	console.log("Checking Rows");
+}
+
+function checkColumns() {
+	console.log("Checking Columns");
+}
+// Check diagonally from bottom left to top right
+function checkLtRDiags() {
+	console.log("Checking Left to Right Diagonals");
+}
+// Check from bottom right to top left
+function checkRtLDiags() {
+	console.log("Checking Right to Left Diagonals");
+}
+
+// Function to find the right object in an array of objects
+function objectFindByKey(array, key, value) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i][key] === value) {
+            return array[i];
+        }
+    }
+    return null;
+}
+
+init(6,7);
