@@ -190,8 +190,8 @@ function checkWin() {
 
 	// Check the gameGridArray to see if there are 4 consecutive tokens in any direction
 	// checkRows();
-	checkColumns();
-	// checkLtRDiags();
+	// checkColumns();
+	checkLtRDiags();
 	// checkRtLDiags();
 }
 
@@ -228,14 +228,22 @@ function checkColumns() {
 		compareTokens(tokensToCompare);
 	}
 }
-// Check diagonally from bottom left to top right
+// Check diagonally from top left to bottom right
 function checkLtRDiags() {
 	console.log("Checking Left to Right Diagonals");
 
-	// Clear token checking array
-	tokensToCompare.length = 0;
+	for (var startToken = 0; startToken <= (totalTokens + totalColumns - tokensToConnect) - (totalColumns * tokensToConnect); startToken++) {
+		// Clear token checking array
+		tokensToCompare.length = 0;
+
+		for (var i = 0; i < tokensToConnect; i++) {
+			tokensToCompare.push(gameGridArray[startToken + (i*totalColumns) + i]);
+		}
+		// Compare the next X tokens
+		compareTokens(tokensToCompare);
+	}
 }
-// Check from bottom right to top left
+// Check from top right to bottom left
 function checkRtLDiags() {
 	console.log("Checking Right to Left Diagonals");
 
