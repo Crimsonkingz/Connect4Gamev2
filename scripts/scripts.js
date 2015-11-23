@@ -23,7 +23,10 @@ var gameGrid = document.getElementById("gameGrid");
 // Store possible moves of the computer
 var computerMoves = [];
 
+// Can have connect whatever you want
+var tokensToConnect = 4;
 
+var tokensToCompare = [];
 // Initialise start settings for the game
 function init(rows, columns) {
 	
@@ -69,7 +72,7 @@ function makeGameGridTokens(numRows, numColumns) {
 
 		// Add an object representing the made token into a 1D array
 		gameGridArray.push({
-			id: i,
+			index: i,
 			value: "empty"
 		})
 
@@ -84,8 +87,8 @@ function playerTokenChoice() {
 	var clickedTokenID = parseInt(clickedToken.id.substring(6));
 	console.log("Clicked Token ID: " + clickedTokenID);
 
-	// Find the object in the array
-	var clickedTokenArrayObject = objectFindByKey(gameGridArray, "id", clickedTokenID);
+	// Find the token object in the array
+	var clickedTokenArrayObject = gameGridArray[clickedTokenID];
 
 
 	// If the clicked on slot is a legal move
@@ -104,7 +107,7 @@ function playerTokenChoice() {
 		// If the game has not been won then the computer takes its turn after 1 second
 		// Otherwise create a player won message
 		if (!gameWon) {
-			setTimeout(computerTokenChoice, 1000);
+			// setTimeout(computerTokenChoice, 1000);
 		}
 		else {
 			alert("Well done, you win!");
@@ -115,17 +118,25 @@ function playerTokenChoice() {
 // Build simple computer AI
 function computerTokenChoice() {
 
+	// Populate array with legal moves
 	generateMoves();
 	
+	// Pick a random number from the array of computer moves
 	var randomChoice = Math.floor(Math.random() * computerMoves.length);
-	
 
-
+	// Pick the token
 	var chosenToken = document.getElementById(computerMoves[randomChoice]);
-
+	var chosenTokenID = parseInt(chosenToken.id.substring(6));
+	
+	// Update the chosen token class
 	chosenToken.classList.toggle("empty");
 	chosenToken.classList.toggle("computer");
 	chosenToken.removeEventListener("click", playerTokenChoice);
+
+	// Update chosen array token
+	var chosenTokenArrayObject = gameGridArray[chosenTokenID];
+	chosenTokenArrayObject.value = "computer";
+
 
 	// Check if the computer has won
 	checkWin();
@@ -143,12 +154,11 @@ function legalMove(arrayToken) {
 	// console.log("Column: " + column);
 	
 	if (arrayToken.value === "empty") {
-		var tokenBelowID = arrayToken.id + totalColumns;
+		var tokenBelowID = arrayToken.index + totalColumns;
 		
-		var tokenBelow = objectFindByKey(gameGridArray, "id", tokenBelowID);
-		
+		var tokenBelow = gameGridArray[tokenBelowID];
 		// Legal move if it is the last row
-		if (tokenBelowID >= totalTokens) {
+		if (tokenBelowID >= totalTokens || tokenBelow == null) {
 			return true;
 		}
 		// Legal move if there is a token below belonging to the player or computer
@@ -163,7 +173,6 @@ function legalMove(arrayToken) {
 
 // Builds an array of legal moves for the computer
 function generateMoves() {
-	console.log("generating moves")
 	// Clear previous moves
 	computerMoves.length = 0;
 
@@ -180,36 +189,74 @@ function generateMoves() {
 function checkWin() {
 
 	// Check the gameGridArray to see if there are 4 consecutive tokens in any direction
-	checkRows();
+	// checkRows();
 	checkColumns();
-	checkLtRDiags();
-	checkRtLDiags();
+	// checkLtRDiags();
+	// checkRtLDiags();
 }
 
 function checkRows() {
 	console.log("Checking Rows");
+
+	
+
+	for (var startToken = 0; startToken <= totalTokens - tokensToConnect; startToken++) {
+		// Clear token checking array
+		tokensToCompare.length = 0;
+
+		for (var i = 0; i < tokensToConnect; i++) {
+			tokensToCompare.push(gameGridArray[startToken+i]);
+
+		}
+		compareTokens(tokensToCompare);
+	}
 }
 
 function checkColumns() {
 	console.log("Checking Columns");
+
+	
+
+	for (var startToken = 0; startToken <= (totalTokens + totalColumns -1) - (totalColumns * tokensToConnect); startToken++) {
+		// Clear token checking array
+		tokensToCompare.length = 0;
+
+		for (var i = 0; i < tokensToConnect; i++) {
+			tokensToCompare.push(gameGridArray[startToken + (i*totalColumns)]);
+		}
+		// Compare the next X tokens
+		compareTokens(tokensToCompare);
+	}
 }
 // Check diagonally from bottom left to top right
 function checkLtRDiags() {
 	console.log("Checking Left to Right Diagonals");
+
+	// Clear token checking array
+	tokensToCompare.length = 0;
 }
 // Check from bottom right to top left
 function checkRtLDiags() {
 	console.log("Checking Right to Left Diagonals");
+
+	// Clear token checking array
+	tokensToCompare.length = 0;
 }
 
-// Function to find the right object in an array of objects
-function objectFindByKey(array, key, value) {
-    for (var i = 0; i < array.length; i++) {
-        if (array[i][key] === value) {
-            return array[i];
-        }
-    }
-    return null;
+function compareTokens(currentTokens) {
+	var sum = 0;
+	for (var i = 0; i < currentTokens.length; i++) {
+		console.log(currentTokens[i].index);
+		if (currentTokens[i].value === "player") {
+			sum += 1;
+		}
+		else if (currentTokens[i].value === "computer") {
+			sum += -1;
+		}
+	}
+	// If the player or computer has won the sum will be (in a regular connect 4) either +4 or -4
+	if (sum === tokensToConnect || sum === (-1 *tokensToConnect)) {
+		gameWon = true;
+	}
 }
-
 init(6,7);
