@@ -191,8 +191,8 @@ function checkWin() {
 	// Check the gameGridArray to see if there are 4 consecutive tokens in any direction
 	// checkRows();
 	// checkColumns();
-	checkLtRDiags();
-	// checkRtLDiags();
+	// checkLtRDiags();
+	checkRtLDiags();
 }
 
 function checkRows() {
@@ -232,11 +232,16 @@ function checkColumns() {
 function checkLtRDiags() {
 	console.log("Checking Left to Right Diagonals");
 
-	for (var startToken = 0; startToken <= (totalTokens + totalColumns - tokensToConnect) - (totalColumns * tokensToConnect); startToken++) {
+	for (var startToken = 0; startToken <= (totalTokens + totalColumns -1) - (totalColumns * tokensToConnect); startToken++) {
 		// Clear token checking array
 		tokensToCompare.length = 0;
 
+		// Jump to the next row when there will not be enough tokens diagonally to the right
+		if (startToken % (totalColumns-1) > tokensToConnect - 2) {
+			startToken += tokensToConnect - 1;
+		}
 		for (var i = 0; i < tokensToConnect; i++) {
+			// Add diagonally down and to the right
 			tokensToCompare.push(gameGridArray[startToken + (i*totalColumns) + i]);
 		}
 		// Compare the next X tokens
@@ -247,8 +252,23 @@ function checkLtRDiags() {
 function checkRtLDiags() {
 	console.log("Checking Right to Left Diagonals");
 
-	// Clear token checking array
-	tokensToCompare.length = 0;
+
+	for (var startToken = 3; startToken <= (totalTokens + totalColumns -1) - (totalColumns * tokensToConnect); startToken++) {
+		// Clear token checking array
+		tokensToCompare.length = 0;
+
+		// Jump to the next row when there will not be enough tokens diagonally to the right
+		// if (startToken % (totalColumns-1) > tokensToConnect - 2) {
+		// 	startToken += tokensToConnect - 1;
+		// }
+		for (var i = 0; i < tokensToConnect; i++) {
+			// Add diagonally down and to the right
+			tokensToCompare.push(gameGridArray[startToken + (i*totalColumns) - i]);
+		}
+		// Compare the next X tokens
+		compareTokens(tokensToCompare);
+	}
+
 }
 
 function compareTokens(currentTokens) {
