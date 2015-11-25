@@ -63,48 +63,28 @@ function makeGameGridTokens(numRows, numColumns) {
 	
 	// Created required number of div elements to act as tokens
 	// also add objects to a 2D array for easier use in checking functions
-	for (var row = 0; row < numRows; row++) {
-		
+	for (var row = 0; row < numRows; row++) {		
+		// Don't you dare do array.length = 0 ever again
+		var rowArray = [];
 
-		// rowArray.length = 0;
-		for (var column = 0; column < 7; column++) {
+		for (var column = 0; column < numColumns; column++) {
 			
 			// Make and setup DOM element			
 			var domToken = createDOMToken(row, column);
 			gameGrid.appendChild(domToken);
 
-			// Add an object representing the made token into a 1D array
-			// var tokenObject = createTokenObject(row, column, "empty");
+			// Add an object representing the made token into a 1D array			
 			
-			
-			// console.log(rowArray);
-
-			returnFunction(row, column, "empty", rowArray)();
+				rowArray.push({
+					row: row,
+					column: column,
+					value: "empty"
+				});		
 			
 		}		
-		
+		gameGridArray.push(rowArray);
 	}
-	gameGridArray.push(rowArray);
-	rowArray = [];
-
 	console.log(gameGridArray);
-}
-
-
-function returnFunction(rowNum, columnNum, gameValue){
-	return function() {
-			var tokenObject = {
-					row: rowNum,
-					column: columnNum,
-					value: gameValue
-				};
-				rowArray.push(tokenObject);
-	}
-}
-function createTokenObject(rowNum, columnNum, gameValue) {
-	
-	 		return	
-
 }
 
 function createDOMToken(row, column) {
@@ -256,8 +236,8 @@ function generateMoves() {
 function checkWin() {
 
 	// Check the gameGridArray to see if there are 4 consecutive tokens in any direction
-	// checkRows();
-	// checkColumns();
+	checkRows();
+	checkColumns();
 	// checkLtRDiags();
 	// checkRtLDiags();
 }
