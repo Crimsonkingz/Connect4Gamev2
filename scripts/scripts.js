@@ -56,40 +56,73 @@ function init(rows, columns) {
 
 // Connect 4 typically has 6 rows and 7 columns (wikipedia)
 function makeGameGridTokens(numRows, numColumns) {
-
-
+	//Make an array that goes inside the larger game grid array
+	var rowArray = [];
+	var rowArray2 = [];
 
 	// Created required number of div elements to act as tokens
-	// also add objects to a 1D array for easier use in checking functions
-	for (var i = 0; i < totalTokens; i++) {
-		// Make and setup DOM element
-		var token = document.createElement("div");
-		token.id = "token-" + i;
-		token.classList.add("slot", "empty");
-		token.addEventListener("click", playerTokenChoice);
-		gameGrid.appendChild(token);
+	// also add objects to a 2D array for easier use in checking functions
+	for (var row = 0; row < numRows; row++) {
+		// if (column % row == 0) {
+		// 	rowArray.length = 0;
+		// }
+		// is cleared each new row
+		
+		for (var column = 0; column < 7; column++) {
+			// Make and setup DOM element
+			var token = document.createElement("div");
+			token.id = "token-" + row + "-" + column;
+			token.classList.add("slot", "empty");
+			token.addEventListener("click", playerTokenChoice);
+			gameGrid.appendChild(token);
 
+			console.log(rowArray);
+			var token = {
+				row: row,
+				column: column,
+				value: "empty"
+			};
+			// Add an object representing the made token into a 1D array
+			rowArray.push(token);
+			//console.log(token);
+			console.log(rowArray);
 
-		// Add an object representing the made token into a 1D array
-		gameGridArray.push({
-			index: i,
-			value: "empty"
-		})
+			// console.log(rowArray2);
+			// rowArray2.push(1);
 
+			// console.log("row complete");
+			// console.log(rowArray2);
+			
+		}
+		gameGridArray.push(rowArray.concat());
+		
 	}
 
+	console.log(gameGridArray);
 }	
+
+// Converts "token-row-column" in to a row number and a column number in an array of [row, column]
+function convertIDtoNums(tokenID) {
+	
+	var splitString = tokenID.split("-");
+	var row = parseInt(splitString[1]);
+	var col = parseInt(splitString[2]);
+
+	return [row,col];
+}
 
 // Player click handler 
 function playerTokenChoice() {
 	
 	var clickedToken = this;
-	var clickedTokenID = parseInt(clickedToken.id.substring(6));
-	console.log("Clicked Token ID: " + clickedTokenID);
+	var clickedTokenRow = convertIDtoNums(clickedToken.id)[0];
+	var clickedTokenColumn = convertIDtoNums(clickedToken.id)[1];
+	console.log("Clicked Token ID: " + clickedToken.id);
+	console.log("Row:" + clickedTokenRow + ", Column:" + clickedTokenColumn);
 
 	// Find the token object in the array
-	var clickedTokenArrayObject = gameGridArray[clickedTokenID];
-
+	var clickedTokenArrayObject = gameGridArray[clickedTokenRow][clickedTokenColumn];
+	console.log(clickedTokenArrayObject);
 
 	// If the clicked on slot is a legal move
 	if (legalMove(clickedTokenArrayObject)) {
@@ -126,7 +159,8 @@ function computerTokenChoice() {
 
 	// Pick the token
 	var chosenToken = document.getElementById(computerMoves[randomChoice]);
-	var chosenTokenID = parseInt(chosenToken.id.substring(6));
+	var chosenTokenRow = convertIDtoNums(chosenToken.id)[0];
+	var chosenTokenColumn = convertIDtoNums(chosenToken.id)[1];
 	
 	// Update the chosen token class
 	chosenToken.classList.toggle("empty");
@@ -134,7 +168,7 @@ function computerTokenChoice() {
 	chosenToken.removeEventListener("click", playerTokenChoice);
 
 	// Update chosen array token
-	var chosenTokenArrayObject = gameGridArray[chosenTokenID];
+	var chosenTokenArrayObject = gameGridArray[chosenTokenRow][chosenTokenColumn];
 	chosenTokenArrayObject.value = "computer";
 
 
@@ -148,27 +182,43 @@ function computerTokenChoice() {
 
 
 function legalMove(arrayToken) {
-	// var row = Math.floor(arrayToken.id / totalColumns);
-	// console.log("Row: " + row);
-	// var column = arrayToken.id % totalColumns;
-	// console.log("Column: " + column);
 	
+	// Slot must be empty
 	if (arrayToken.value === "empty") {
-		var tokenBelowID = arrayToken.index + totalColumns;
+		console.log("slot is empty");
 		
-		var tokenBelow = gameGridArray[tokenBelowID];
-		// Legal move if it is the last row
-		if (tokenBelowID >= totalTokens || tokenBelow == null) {
-			return true;
-		}
-		// Legal move if there is a token below belonging to the player or computer
-		else if (tokenBelow.value !== "empty") {
-			return true;
+		if (tokenExists(arrayToken.row+1, arrayToken.column)) {
+			console.log ("slot below exists");
+			var tokenBelow = gameGridArray[arrayToken.row+1][arrayToken.column];
+			if (tokenBelow.value !== "empty") {
+				console.log("There is a token below :D");
+			}
+			else {
+				console.log("there is NO token below :(");
+			}
 		}
 		else {
-			return false;
+			console.log("on the last row!");
 		}
+
+	}
+
+	else {
+		console.log("Not empty");
+		return false
 	}	
+
+}
+
+// Checks if a row number and column number are within the bounds of the game grid
+function tokenExists(rowNum, columnNum) {
+	console.log(rowNum + ", " + columnNum);
+	if (rowNum < totalRows && columnNum < totalColumns) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 // Builds an array of legal moves for the computer
@@ -178,10 +228,12 @@ function generateMoves() {
 
 	// Go through each token and see if it is a possible move
 	// If so, add the ID of that token to an array of possible tokens to click
-	for (var token = 0; token < totalTokens; token++) {
-		if (legalMove(gameGridArray[token])) {
-			console.log("token " + token + " is a legal move");
-			computerMoves.push("token-" + token);
+	for (var tokenRow = 0; tokenRow < totalRows; tokenRow++) {
+		for (var tokenCol = 0; tokenCol < totalColumns; tokenCol++) {
+			if (legalMove(gameGridArray[tokenRow][tokenCol])) {
+				console.log("token-" + tokenRow + "-" + tokenCol + " is a legal move");
+				computerMoves.push("token-" + tokenRow + "-" + tokenCol);
+			}
 		}
 	}
 }
@@ -192,40 +244,41 @@ function checkWin() {
 	// checkRows();
 	// checkColumns();
 	// checkLtRDiags();
-	checkRtLDiags();
+	// checkRtLDiags();
 }
 
 function checkRows() {
 	console.log("Checking Rows");
 
 	
+	for (var row = 0; row < totalRows; row++) {
+		for (var startColumn = 0; startColumn <= totalColumns - tokensToConnect; startColumn++) {
+			// Clear token checking array
+			tokensToCompare.length = 0;
 
-	for (var startToken = 0; startToken <= totalTokens - tokensToConnect; startToken++) {
-		// Clear token checking array
-		tokensToCompare.length = 0;
+			for (var i = 0; i < tokensToConnect; i++) {
+				tokensToCompare.push(gameGridArray[row][startColumn+i]);
 
-		for (var i = 0; i < tokensToConnect; i++) {
-			tokensToCompare.push(gameGridArray[startToken+i]);
-
+			}
+			compareTokens(tokensToCompare);
 		}
-		compareTokens(tokensToCompare);
 	}
 }
 
 function checkColumns() {
 	console.log("Checking Columns");
 
-	
+	for (var column = 0; column < totalColumns; column++) {
+		for (var startRow = 0; startRow <= totalRows - tokensToConnect; startRow++) {
+			// Clear token checking array
+			tokensToCompare.length = 0;
 
-	for (var startToken = 0; startToken <= (totalTokens + totalColumns -1) - (totalColumns * tokensToConnect); startToken++) {
-		// Clear token checking array
-		tokensToCompare.length = 0;
+			for (var i = 0; i < tokensToConnect; i++) {
+				tokensToCompare.push(gameGridArray[startRow+i][column]);
 
-		for (var i = 0; i < tokensToConnect; i++) {
-			tokensToCompare.push(gameGridArray[startToken + (i*totalColumns)]);
+			}
+			compareTokens(tokensToCompare);
 		}
-		// Compare the next X tokens
-		compareTokens(tokensToCompare);
 	}
 }
 // Check diagonally from top left to bottom right
