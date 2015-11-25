@@ -8,11 +8,12 @@
 
 // Array to hold all the created div elements/game discs
 var gameGridArray = [];
-
 // Dimensions of game grid
 var totalRows;
 var totalColumns;
 var totalTokens;
+
+var rowArray = [];
 
 // Store win/loss state
 var gameWon;
@@ -57,49 +58,63 @@ function init(rows, columns) {
 // Connect 4 typically has 6 rows and 7 columns (wikipedia)
 function makeGameGridTokens(numRows, numColumns) {
 	//Make an array that goes inside the larger game grid array
-	var rowArray = [];
-	var rowArray2 = [];
-
+	
+	
+	
 	// Created required number of div elements to act as tokens
 	// also add objects to a 2D array for easier use in checking functions
 	for (var row = 0; row < numRows; row++) {
-		// if (column % row == 0) {
-		// 	rowArray.length = 0;
-		// }
-		// is cleared each new row
 		
+
+		// rowArray.length = 0;
 		for (var column = 0; column < 7; column++) {
-			// Make and setup DOM element
+			
+			// Make and setup DOM element			
+			var domToken = createDOMToken(row, column);
+			gameGrid.appendChild(domToken);
+
+			// Add an object representing the made token into a 1D array
+			// var tokenObject = createTokenObject(row, column, "empty");
+			
+			
+			// console.log(rowArray);
+
+			returnFunction(row, column, "empty", rowArray)();
+			
+		}		
+		
+	}
+	gameGridArray.push(rowArray);
+	rowArray = [];
+
+	console.log(gameGridArray);
+}
+
+
+function returnFunction(rowNum, columnNum, gameValue){
+	return function() {
+			var tokenObject = {
+					row: rowNum,
+					column: columnNum,
+					value: gameValue
+				};
+				rowArray.push(tokenObject);
+	}
+}
+function createTokenObject(rowNum, columnNum, gameValue) {
+	
+	 		return	
+
+}
+
+function createDOMToken(row, column) {
 			var token = document.createElement("div");
 			token.id = "token-" + row + "-" + column;
 			token.classList.add("slot", "empty");
 			token.addEventListener("click", playerTokenChoice);
-			gameGrid.appendChild(token);
-
-			console.log(rowArray);
-			var token = {
-				row: row,
-				column: column,
-				value: "empty"
-			};
-			// Add an object representing the made token into a 1D array
-			rowArray.push(token);
-			//console.log(token);
-			console.log(rowArray);
-
-			// console.log(rowArray2);
-			// rowArray2.push(1);
-
-			// console.log("row complete");
-			// console.log(rowArray2);
 			
-		}
-		gameGridArray.push(rowArray.concat());
-		
-	}
-
-	console.log(gameGridArray);
-}	
+			return token;
+}
 
 // Converts "token-row-column" in to a row number and a column number in an array of [row, column]
 function convertIDtoNums(tokenID) {
