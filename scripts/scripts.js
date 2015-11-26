@@ -6,30 +6,35 @@
 // Player will be one colour and Computer will be another colour
 // Player starts first as it is an advantage (want player to win more)
 
-// Array to hold all the created div elements/game discs
+
+// Array to hold array entries that are equivalent to the game tokens but in object form rather than DOM elements
 var gameGridArray = [];
+// Array to hold the rows of tokens which is then put inside the gameGridArray to form a 2D array
+var rowArray = [];
+
 // Dimensions of game grid
 var totalRows;
 var totalColumns;
 var totalTokens;
 
-var rowArray = [];
-
 // Store win/loss state
 var gameWon;
 
-// Game grid that will hold all of the divs
+// Game grid that will hold all of the token DOM elements
 var gameGrid = document.getElementById("gameGrid");
 
 // Store possible moves of the computer
 var computerMoves = [];
 
-// Can have connect whatever you want
+// Can have connect # whatever you want
 var tokensToConnect = 4;
 
+// Array to compare any number of tokens for a win
 var tokensToCompare = [];
+
+
 // Initialise start settings for the game
-function init(rows, columns) {
+var init = function(rows, columns) {
 	
 	// Reset game state
 	gameWon = false;
@@ -47,7 +52,6 @@ function init(rows, columns) {
 		}
 	}
 	
-	
 	// Creates tokens and an array to represent these tokens
 	makeGameGridTokens(rows, columns);	
 
@@ -56,7 +60,7 @@ function init(rows, columns) {
 
 
 // Connect 4 typically has 6 rows and 7 columns (wikipedia)
-function makeGameGridTokens(numRows, numColumns) {
+var makeGameGridTokens = function(numRows, numColumns) {
 	//Make an array that goes inside the larger game grid array
 	
 	
@@ -71,15 +75,11 @@ function makeGameGridTokens(numRows, numColumns) {
 			
 			// Make and setup DOM element			
 			var domToken = createDOMToken(row, column);
+			// Append div element (token) to grid
 			gameGrid.appendChild(domToken);
 
 			// Add an object representing the made token into a 1D array			
-			
-				rowArray.push({
-					row: row,
-					column: column,
-					value: "empty"
-				});		
+				rowArray.push(createArrayToken(row, column, "empty"));		
 			
 		}		
 		gameGridArray.push(rowArray);
@@ -87,7 +87,7 @@ function makeGameGridTokens(numRows, numColumns) {
 	console.log(gameGridArray);
 }
 
-function createDOMToken(row, column) {
+var createDOMToken = function(row, column) {
 
 			var token = document.createElement("div");
 			token.id = "token-" + row + "-" + column;
@@ -97,8 +97,16 @@ function createDOMToken(row, column) {
 			return token;
 }
 
+var createArrayToken = function(row, column, value) {
+	return {
+		row: row,
+		column: column,
+		value: value
+	};
+}
+
 // Converts "token-row-column" in to a row number and a column number in an array of [row, column]
-function convertIDtoNums(tokenID) {
+var convertIDtoNums = function(tokenID) {
 	
 	var splitString = tokenID.split("-");
 	var row = parseInt(splitString[1]);
@@ -108,7 +116,7 @@ function convertIDtoNums(tokenID) {
 }
 
 // Player click handler 
-function playerTokenChoice() {
+var playerTokenChoice = function () {
 	
 	var clickedToken = this;
 	var clickedTokenRow = convertIDtoNums(clickedToken.id)[0];
@@ -144,7 +152,7 @@ function playerTokenChoice() {
 }
 
 // Build simple computer AI
-function computerTokenChoice() {
+var computerTokenChoice = function() {
 
 	// Populate array with legal moves
 	generateMoves();
@@ -176,14 +184,13 @@ function computerTokenChoice() {
 }
 
 
-function legalMove(arrayToken) {
+var legalMove = function(arrayToken) {
 	
 	// Slot must be empty
 	if (arrayToken.value === "empty") {
 		
 		// If there is a slot below
 		if (tokenExists(arrayToken.row+1, arrayToken.column)) {
-
 			
 			var tokenBelow = gameGridArray[arrayToken.row+1][arrayToken.column];
 
@@ -203,9 +210,7 @@ function legalMove(arrayToken) {
 			
 			return true;
 		}
-
 	}
-
 	else {
 		
 		return false
@@ -214,7 +219,7 @@ function legalMove(arrayToken) {
 }
 
 // Checks if a row number and column number are within the bounds of the game grid
-function tokenExists(rowNum, columnNum) {
+var tokenExists = function(rowNum, columnNum) {
 	if (rowNum < totalRows && columnNum < totalColumns) {		
 		return true;
 	}
@@ -224,7 +229,7 @@ function tokenExists(rowNum, columnNum) {
 }
 
 // Builds an array of legal moves for the computer
-function generateMoves() {
+var generateMoves = function() {
 	// Clear previous moves
 	computerMoves = [];
 
@@ -240,16 +245,16 @@ function generateMoves() {
 	}
 }
 
-function checkWin() {
+var checkWin = function() {
 
 	// Check the gameGridArray to see if there are 4 consecutive tokens in any direction
-	// checkRows();
-	// checkColumns();
+	checkRows();
+	checkColumns();
 	checkLtRDiags();
 	checkRtLDiags();
 }
 
-function checkRows() {
+var checkRows = function() {
 	console.log("Checking Rows");
 
 	
@@ -267,11 +272,12 @@ function checkRows() {
 	}
 }
 
-function checkColumns() {
+var checkColumns = function() {
 	console.log("Checking Columns");
 
 	for (var column = 0; column < totalColumns; column++) {
 		for (var startRow = 0; startRow <= totalRows - tokensToConnect; startRow++) {
+			
 			// Clear token checking array
 			tokensToCompare = [];
 
@@ -285,19 +291,21 @@ function checkColumns() {
 	}
 }
 // Check diagonally from top left to bottom right
-function checkLtRDiags() {
+var checkLtRDiags = function() {
 	console.log("Checking Left to Right Diagonals");
-	tokensToCompare = [];
+	
 
 	for (var row = 0; row <= totalRows - tokensToConnect; row++) {
 
 		for (var column = 0; column <= totalColumns - tokensToConnect; column++) {
 
+			tokensToCompare = [];
 			for (var i = 0; i < tokensToConnect; i++) {
-
+				
 				tokensToCompare.push(gameGridArray[row+i][column+i]);
 
 			}
+			
 			compareTokens(tokensToCompare);
 		}
 	}	
@@ -305,16 +313,17 @@ function checkLtRDiags() {
 }
 
 // Check from top right to bottom left
-function checkRtLDiags() {
+var checkRtLDiags = function() {
 	console.log("Checking Right to Left Diagonals");
-	tokensToCompare = [];
+	
 
 	for (var row = 0; row <= totalRows - tokensToConnect; row++) {
 
-		for (var column = tokensToConnect-1; column <= totalColumns; column++) {
+		for (var column = tokensToConnect-1; column < totalColumns; column++) {
 
+			tokensToCompare = [];
 			for (var i = 0; i < tokensToConnect; i++) {
-				console.log(gameGridArray[row+i][column-i]);
+				
 				tokensToCompare.push(gameGridArray[row+i][column-i]);
 
 			}
@@ -323,7 +332,7 @@ function checkRtLDiags() {
 	}	
 }
 
-function compareTokens(currentTokens) {
+var compareTokens = function(currentTokens) {
 	var sum = 0;
 	for (var i = 0; i < currentTokens.length; i++) {
 		
@@ -339,4 +348,6 @@ function compareTokens(currentTokens) {
 		gameWon = true;
 	}
 }
+
+// Start the game
 init(6,7);
