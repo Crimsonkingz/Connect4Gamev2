@@ -7,7 +7,7 @@ body {
 }
  /*need some help with these sizes and stuff */
 #gameContainer {
-
+	
 	margin: 0 auto;
 	background-color: #FFF;	
 	top: 0;
@@ -17,8 +17,15 @@ body {
 }
 
 #gameGrid {
-
-	margin: 5% auto;	
+	position: relative;
+	float: left;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	   -moz-transform: translateX(-50%);
+	    -ms-transform: translateX(-50%);
+	     -o-transform: translateX(-50%);
+	        transform: translateX(-50%);
+	
 	width: 700px;
 	height: 100%;
 	background-color: blue;
@@ -39,14 +46,15 @@ body {
 }
 
 .slot {
-
+	position: relative;
 	width: 90px;
 	height: 90px;
 	float: left;
 	display: inline-block;
 	border-radius: 100%;	
-	margin: 2px;	
-
+	margin: 5px;
+		
+	
 }
 
 .empty {

@@ -17,6 +17,7 @@ var totalRows;
 var totalColumns;
 var totalTokens;
 
+var tokenSize;
 // Store win/loss state
 var gameWon;
 
@@ -53,7 +54,9 @@ var init = function(rows, columns) {
 	}
 	
 	// Creates tokens and an array to represent these tokens
-	makeGameGridTokens(rows, columns);	
+	makeGameGridTokens(rows, columns);
+	styleDivs();
+	gameGrid.style.width = columns 	
 
 }
 
@@ -63,7 +66,7 @@ var init = function(rows, columns) {
 var makeGameGridTokens = function(numRows, numColumns) {
 	//Make an array that goes inside the larger game grid array
 	
-	
+	console.log(gameGrid.style.width);
 	
 	// Created required number of div elements to act as tokens
 	// also add objects to a 2D array for easier use in checking functions
@@ -93,10 +96,21 @@ var createDOMToken = function(row, column) {
 			token.id = "token-" + row + "-" + column;
 			token.classList.add("slot", "empty");
 			token.addEventListener("click", playerTokenChoice);
+
 			
 			return token;
 }
 
+var styleDivs = function() {
+	for (var row = 0; row < totalRows; row++) {
+		for (var column = 0; column < totalColumns; column++) {
+			var token = document.getElementById("token-"+row+"-"+column);
+			token.style.width = gameGrid.style.width / totalColumns + "px";
+			token.style.height = token.style.width;
+		}
+	}
+	
+}
 var createArrayToken = function(row, column, value) {
 	return {
 		row: row,
