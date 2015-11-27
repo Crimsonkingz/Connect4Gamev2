@@ -7,6 +7,8 @@
 // Player starts first as it is an advantage (want player to win more)
 
 
+
+
 // Array to hold array entries that are equivalent to the game tokens but in object form rather than DOM elements
 var gameGridArray = [];
 // Array to hold the rows of tokens which is then put inside the gameGridArray to form a 2D array
@@ -20,10 +22,10 @@ var totalTokens;
 var tokenSize;
 // Store win/loss state
 var gameWon;
-
+var allowMove;
 // Game grid that will hold all of the token DOM elements
 var gameGrid = document.getElementById("gameGrid");
-
+var tokenMargin = 5;
 // Store possible moves of the computer
 var computerMoves = [];
 
@@ -33,12 +35,13 @@ var tokensToConnect = 4;
 // Array to compare any number of tokens for a win
 var tokensToCompare = [];
 
-
 // Initialise start settings for the game
 var init = function(rows, columns) {
-	
+
+		
 	// Reset game state
 	gameWon = false;
+	allowMove = true;
 
 	// Set global variables
 	totalTokens = rows * columns;	
@@ -55,9 +58,7 @@ var init = function(rows, columns) {
 	
 	// Creates tokens and an array to represent these tokens
 	makeGameGridTokens(rows, columns);
-	styleDivs();
-	gameGrid.style.width = columns 	
-
+	
 }
 
 
@@ -66,7 +67,7 @@ var init = function(rows, columns) {
 var makeGameGridTokens = function(numRows, numColumns) {
 	//Make an array that goes inside the larger game grid array
 	
-	console.log(gameGrid.style.width);
+
 	
 	// Created required number of div elements to act as tokens
 	// also add objects to a 2D array for easier use in checking functions
@@ -82,7 +83,7 @@ var makeGameGridTokens = function(numRows, numColumns) {
 			gameGrid.appendChild(domToken);
 
 			// Add an object representing the made token into a 1D array			
-				rowArray.push(createArrayToken(row, column, "empty"));		
+			rowArray.push(createArrayToken(row, column, "empty"));		
 			
 		}		
 		gameGridArray.push(rowArray);
@@ -92,25 +93,22 @@ var makeGameGridTokens = function(numRows, numColumns) {
 
 var createDOMToken = function(row, column) {
 
-			var token = document.createElement("div");
-			token.id = "token-" + row + "-" + column;
-			token.classList.add("slot", "empty");
-			token.addEventListener("click", playerTokenChoice);
-
-			
-			return token;
+	var token = document.createElement("div");
+	token.id = "token-" + row + "-" + column;
+	token.classList.add("slot", "empty");
+	token.addEventListener("click", playerTokenChoice);
+	// Style Tokens
+	// token.style.margin = "5px";
+	// token.style.offsetWidth = gameGrid.offsetWidth / (totalColumns);
+	token.style.offsetHeight = gameGrid.offsetWidth / (totalColumns);
+	console.log(gameGrid.offsetWidth);
+	token.style.width = 24.2 + "px";
+	token.style.height = token.style.width;
+	token.style.margin = "5px";
+	return token;
 }
 
-var styleDivs = function() {
-	for (var row = 0; row < totalRows; row++) {
-		for (var column = 0; column < totalColumns; column++) {
-			var token = document.getElementById("token-"+row+"-"+column);
-			token.style.width = gameGrid.style.width / totalColumns + "px";
-			token.style.height = token.style.width;
-		}
-	}
-	
-}
+
 var createArrayToken = function(row, column, value) {
 	return {
 		row: row,
@@ -131,37 +129,42 @@ var convertIDtoNums = function(tokenID) {
 
 // Player click handler 
 var playerTokenChoice = function () {
-	
-	var clickedToken = this;
-	var clickedTokenRow = convertIDtoNums(clickedToken.id)[0];
-	var clickedTokenColumn = convertIDtoNums(clickedToken.id)[1];
+	if (allowMove) {
+		
+		allowMove = false;
+
+		var clickedToken = this;
+		var clickedTokenRow = convertIDtoNums(clickedToken.id)[0];
+		var clickedTokenColumn = convertIDtoNums(clickedToken.id)[1];
 
 
-	// Find the token object in the array
-	var clickedTokenArrayObject = gameGridArray[clickedTokenRow][clickedTokenColumn];
-	
+		// Find the token object in the array
+		var clickedTokenArrayObject = gameGridArray[clickedTokenRow][clickedTokenColumn];
+		
 
-	// If the clicked on slot is a legal move
-	if (legalMove(clickedTokenArrayObject)) {
-		// Remove empty class and replace with player class
-		clickedToken.classList.toggle("empty");
-		clickedToken.classList.toggle("player");		
-		// Remove click event listener
-		clickedToken.removeEventListener("click", playerTokenChoice);
+		// If the clicked on slot is a legal move
+		if (legalMove(clickedTokenArrayObject)) {
+			// Remove empty class and replace with player class
+			clickedToken.classList.toggle("empty");
+			clickedToken.classList.toggle("player");		
+			// Remove click event listener
+			clickedToken.removeEventListener("click", playerTokenChoice);
 
-		// Update array object
-		clickedTokenArrayObject.value = "player";
+			// Update array object
+			clickedTokenArrayObject.value = "player";
 
-		// Check if the player has won the game
-		checkWin();
-		// If the game has not been won then the computer takes its turn after 1 second
-		// Otherwise create a player won message
-		if (!gameWon) {
-			setTimeout(computerTokenChoice, 1000);
+			// Check if the player has won the game
+			checkWin();
+			// If the game has not been won then the computer takes its turn after 1 second
+			// Otherwise create a player won message
+			if (!gameWon) {
+				setTimeout(computerTokenChoice, 1000);
+				
+			}
+			else {
+				alert("Well done, you win!");
+			}		
 		}
-		else {
-			alert("Well done, you win!");
-		}		
 	}
 }
 
@@ -194,7 +197,8 @@ var computerTokenChoice = function() {
 	if (gameWon) {
 		alert("You lose!");
 	}
-
+	allowMove = true;
+	
 }
 
 
@@ -360,8 +364,11 @@ var compareTokens = function(currentTokens) {
 	// If the player or computer has won the sum will be (in a regular connect 4) either +4 or -4
 	if (sum === tokensToConnect || sum === (-1 *tokensToConnect)) {
 		gameWon = true;
+		allowMove = false;
 	}
 }
+
+
 
 // Start the game
 init(6,7);

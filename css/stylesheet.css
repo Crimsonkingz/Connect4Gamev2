@@ -1,36 +1,26 @@
 
-body {
-
+#container {
 	width: 100%;
-	height: auto;
-
-}
- /*need some help with these sizes and stuff */
-#gameContainer {
+	height:100%;
+	position: absolute;
 	
-	margin: 0 auto;
-	background-color: #FFF;	
-	top: 0;
-	left: 0;
-	width: 1000px;
-	height: 1000px;
 }
 
 #gameGrid {
-	position: relative;
-	float: left;
-	left: 50%;
-	-webkit-transform: translateX(-50%);
-	   -moz-transform: translateX(-50%);
-	    -ms-transform: translateX(-50%);
-	     -o-transform: translateX(-50%);
-	        transform: translateX(-50%);
+
+	position: absolute;
+	left:50%;
+	top:50%;
+
+	-webkit-transform: translate(-50%, -50%);
+	   -moz-transform: translate(-50%, -50%);
+	    -ms-transform: translate(-50%, -50%);
+	     -o-transform: translate(-50%, -50%);
+	        transform: translate(-50%, -50%);
 	
-	width: 700px;
-	height: 100%;
-	background-color: blue;
-	
-	
+	width: 240px;
+	height: auto;
+	background-color:blue;
 }
 
 
@@ -47,12 +37,10 @@ body {
 
 .slot {
 	position: relative;
-	width: 90px;
-	height: 90px;
-	float: left;
+	float: left;	
 	display: inline-block;
 	border-radius: 100%;	
-	margin: 5px;
+	
 		
 	
 }
