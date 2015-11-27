@@ -98,11 +98,9 @@ var createDOMToken = function(row, column) {
 	token.classList.add("slot", "empty");
 	token.addEventListener("click", playerTokenChoice);
 	// Style Tokens
-	// token.style.margin = "5px";
-	// token.style.offsetWidth = gameGrid.offsetWidth / (totalColumns);
-	token.style.offsetHeight = gameGrid.offsetWidth / (totalColumns);
+	
 	console.log(gameGrid.offsetWidth);
-	token.style.width = 24.2 + "px";
+	token.style.width = (gameGrid.offsetWidth / totalColumns) - 10 + "px";
 	token.style.height = token.style.width;
 	token.style.margin = "5px";
 	return token;
@@ -130,7 +128,7 @@ var convertIDtoNums = function(tokenID) {
 // Player click handler 
 var playerTokenChoice = function () {
 	if (allowMove) {
-		
+
 		allowMove = false;
 
 		var clickedToken = this;
@@ -368,7 +366,9 @@ var compareTokens = function(currentTokens) {
 	}
 }
 
+window.addEventListener("resize", function() {
 
+});
 
 // Start the game
 init(6,7);
