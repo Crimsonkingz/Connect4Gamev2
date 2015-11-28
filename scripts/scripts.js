@@ -96,7 +96,7 @@ var createDOMToken = function(row, column) {
 	var token = document.createElement("div");
 	token.id = "token-" + row + "-" + column;
 	token.classList.add("slot", "empty");
-	token.addEventListener("click", playerTokenChoice);
+	token.addEventListener("click", clickHandler);
 	// Style Tokens
 	
 	console.log(gameGrid.offsetWidth);
@@ -125,13 +125,46 @@ var convertIDtoNums = function(tokenID) {
 	return [row,col];
 }
 
+var clickTimer = null;
+var clickHandler = function(){
+	var clickedToken = this;
+	 if (clickTimer === null) {
+        clickTimer = setTimeout(function () {
+            clickTimer = null;
+            console.log('single');
+
+            clearAllClass(clickedToken, "selected");
+            clickedToken.classList.add("selected");
+
+        }, 500)
+    } 
+    else {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        console.log('double');
+        
+        clearAllClass(clickedToken, "selected");
+        playerTokenChoice(clickedToken)
+    }
+}
+
+var clearAllClass = function (child, cls) {
+	var parentEle = child.parentNode;
+	
+	for (var i = 0; i < parentEle.childNodes.length; i++) {
+		var iThToken = parentEle.childNodes[i];
+		if (iThToken.classList.contains("selected")) {
+        	iThToken.classList.remove("selected");
+        }
+	}
+}
 // Player click handler 
-var playerTokenChoice = function () {
+var playerTokenChoice = function (clickedToken) {
 	if (allowMove) {
 
 		allowMove = false;
 
-		var clickedToken = this;
+		
 		var clickedTokenRow = convertIDtoNums(clickedToken.id)[0];
 		var clickedTokenColumn = convertIDtoNums(clickedToken.id)[1];
 
