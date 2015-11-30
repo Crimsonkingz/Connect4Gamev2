@@ -25,6 +25,7 @@ var gameWon;
 var allowMove;
 // Game grid that will hold all of the token DOM elements
 var gameGrid = document.getElementById("gameGrid");
+
 var tokenMargin = 5;
 // Store possible moves of the computer
 var computerMoves = [];
@@ -47,17 +48,12 @@ var init = function(rows, columns) {
 	totalTokens = rows * columns;	
 	totalRows = rows;
 	totalColumns = columns;
-
-	// If the game grid is already populated and needs to be cleared
-	if (gameGrid.children !== null && gameGrid.children.length !== 0) {
-		
-		for (var i = 0; i < gameGrid.length; i++) {
-			gameGrid.removeChild(gameGrid.children[i]);
-		}
-	}
+	
 	gameGrid.style.width = window.innerWidth/2;
+
 	// Creates tokens and an array to represent these tokens
 	makeGameGridTokens(rows, columns);
+
 	
 }
 
@@ -125,6 +121,7 @@ var convertIDtoNums = function(tokenID) {
 	return [row,col];
 }
 
+// Distinguishes between single and double clicks
 var clickTimer = null;
 var clickHandler = function(){
 	var clickedToken = this;
@@ -144,7 +141,7 @@ var clickHandler = function(){
         console.log('double');
         
         clearAllClass(clickedToken, "selected");
-        playerTokenChoice(clickedToken)
+        playerTokenChoice(clickedToken);
     }
 }
 
@@ -175,29 +172,60 @@ var playerTokenChoice = function (clickedToken) {
 
 		// If the clicked on slot is a legal move
 		if (legalMove(clickedTokenArrayObject)) {
-			// Remove empty class and replace with player class
-			clickedToken.classList.toggle("empty");
-			clickedToken.classList.toggle("player");		
+				
 			// Remove click event listener
 			clickedToken.removeEventListener("click", playerTokenChoice);
 
+			// Do the click animation
+			dropAnim(clickedToken, "PLAYER");
+			
 			// Update array object
 			clickedTokenArrayObject.value = "player";
 
-			// Check if the player has won the game
-			checkWin();
-			// If the game has not been won then the computer takes its turn after 1 second
-			// Otherwise create a player won message
-			if (!gameWon) {
-				setTimeout(computerTokenChoice, 1000);
+			
 				
-			}
-			else {
-				alert("Well done, you win!");
-			}		
+				// Check if the player has won the game
+				checkWin();
+				// If the game has not been won then the computer takes its turn after 1 second
+				// Otherwise create a player won message
+				if (!gameWon) {
+					setTimeout(computerTokenChoice, 1000);
+					
+				}
+				else {
+					setTimeout(function(){ 
+						alert("Well done, you win! :D");
+					}, 2000);
+				}
+			
+
 		}
 	}
 }
+
+var dropAnim = function(token, owner) {
+	var dropToken = document.createElement("div");
+	// dropToken.style.width = (gameGrid.offsetWidth / totalColumns) - 10 + "px";
+	// dropToken.style.height = token.style.width;
+	// dropToken.style.margin = "5px";
+	if (owner === "PLAYER") {
+		dropToken.style.backgroundColor = "red";
+	}
+	else if (owner === "COMPUTER") {
+		dropToken.style.backgroundColor = "yellow";
+	}
+	dropToken.style.borderRadius ="50%";
+	dropToken.classList.add("dropAnimToken");
+	token.appendChild(dropToken);
+
+	setTimeout(function(){
+		dropToken.classList.add("bounceAnim");
+	}, 900);
+
+
+}
+
+
 
 // Build simple computer AI
 var computerTokenChoice = function() {
@@ -214,8 +242,9 @@ var computerTokenChoice = function() {
 	var chosenTokenColumn = convertIDtoNums(chosenToken.id)[1];
 	
 	// Update the chosen token class
-	chosenToken.classList.toggle("empty");
-	chosenToken.classList.toggle("computer");
+	// chosenToken.classList.toggle("empty");
+	// chosenToken.classList.toggle("computer");
+	dropAnim(chosenToken, "COMPUTER")
 	chosenToken.removeEventListener("click", playerTokenChoice);
 
 	// Update chosen array token
@@ -226,7 +255,11 @@ var computerTokenChoice = function() {
 	// Check if the computer has won
 	checkWin();
 	if (gameWon) {
-		alert("You lose!");
+		setTimeout(function(){ 
+
+			alert("You lose :(");
+
+		}, 2000);
 	}
 	allowMove = true;
 	
@@ -417,3 +450,14 @@ window.addEventListener("resize", function() {
 
 // Start the game
 init(6,7);
+
+var restartButton = document.getElementById("restartButton");
+restartButton.addEventListener("click", function() {
+	
+	while (gameGrid.firstChild) {
+    	gameGrid.removeChild(gameGrid.firstChild);
+	}
+	gameGridArray = [];
+	init(6,7);
+
+});
