@@ -55,7 +55,7 @@ var init = function(rows, columns) {
 			gameGrid.removeChild(gameGrid.children[i]);
 		}
 	}
-	
+	gameGrid.style.width = window.innerWidth/2;
 	// Creates tokens and an array to represent these tokens
 	makeGameGridTokens(rows, columns);
 	
@@ -99,7 +99,7 @@ var createDOMToken = function(row, column) {
 	token.addEventListener("click", clickHandler);
 	// Style Tokens
 	
-	console.log(gameGrid.offsetWidth);
+	
 	token.style.width = (gameGrid.offsetWidth / totalColumns) - 10 + "px";
 	token.style.height = token.style.width;
 	token.style.margin = "5px";
@@ -401,6 +401,18 @@ var compareTokens = function(currentTokens) {
 
 window.addEventListener("resize", function() {
 
+	// Resize game grid
+	gameGrid.style.width = window.innerWidth/3 ;
+
+
+	// Resize tokens
+	for (var i = 0; i < totalTokens; i++) {
+
+			var token = gameGrid.childNodes[i];
+			token.style.width = (gameGrid.offsetWidth / totalColumns) - 10 + "px";
+			token.style.height = token.style.width;
+		}		
+	
 });
 
 // Start the game
