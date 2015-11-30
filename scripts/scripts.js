@@ -240,12 +240,12 @@ var computerTokenChoice = function() {
 	var chosenToken = document.getElementById(computerMoves[randomChoice]);
 	var chosenTokenRow = convertIDtoNums(chosenToken.id)[0];
 	var chosenTokenColumn = convertIDtoNums(chosenToken.id)[1];
-	
+	chosenToken.removeEventListener("click", playerTokenChoice);
 	// Update the chosen token class
 	// chosenToken.classList.toggle("empty");
 	// chosenToken.classList.toggle("computer");
 	dropAnim(chosenToken, "COMPUTER")
-	chosenToken.removeEventListener("click", playerTokenChoice);
+	
 
 	// Update chosen array token
 	var chosenTokenArrayObject = gameGridArray[chosenTokenRow][chosenTokenColumn];
@@ -254,15 +254,18 @@ var computerTokenChoice = function() {
 
 	// Check if the computer has won
 	checkWin();
-	if (gameWon) {
-		setTimeout(function(){ 
+	setTimeout(function(){ 
+		if (gameWon) {
+			
 
-			alert("You lose :(");
+				alert("You lose :(");
 
-		}, 2000);
-	}
-	allowMove = true;
-	
+			
+		}
+		else {
+			allowMove = true;
+		}
+	}, 2000);
 }
 
 
